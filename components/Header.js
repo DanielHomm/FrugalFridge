@@ -21,12 +21,12 @@ export default function Header() {
 
   // Base nav items
   const navItems = [
-    { name: t("dashboard"), href: "/dashboard" },
+    { name: t("shopping_list"), href: "/groceries/shopping-list" },
+    { name: t("inventory"), href: "/groceries/inventory" },
     { name: t("challenges"), href: "/challenges" },
   ];
 
   if (isAdmin) {
-    navItems.push({ name: t("groceries"), href: "/groceries/inventory" });
     navItems.push({ name: "Admin", href: "/admin" });
   }
 

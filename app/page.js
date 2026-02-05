@@ -1,31 +1,22 @@
 "use client";
 
 import { useAuth } from "../lib/AuthContext";
-import { useChallengesList } from "@/lib/hooks/challenges/useChallengesList";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/context/LanguageContext";
 
 export default function HomePage() {
   const { user } = useAuth();
-  const router = useRouter();
-
-  // Conditionally fetch challenges only if user is logged in
-  // Note: the hook handles 'enabled: !!user' internally
-  const { challenges, loading } = useChallengesList();
+  const { t } = useLanguage();
 
   if (!user) {
     return <LandingPage />;
   }
 
-  // Dashboard View
-  const activeChallenges = challenges ? challenges.length : 0;
-  const recentChallenges = challenges ? challenges.slice(0, 3) : [];
-
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return t("greeting_morning");
+    if (hour < 18) return t("greeting_afternoon");
+    return t("greeting_evening");
   };
 
   return (
@@ -36,107 +27,66 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
             {getGreeting()}, <span className="text-emerald-400">{user.email?.split('@')[0]}</span>
           </h1>
-          <p className="text-gray-400 mt-1">Ready to crush your goals today?</p>
+          <p className="text-gray-400 mt-1">{t('welcome_msg')}</p>
         </div>
-        <button
-          onClick={() => router.push('/challenges/new')}
-          className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 active:scale-95"
-        >
-          + New Challenge
-        </button>
       </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          label="Active Challenges"
-          value={activeChallenges}
-          icon="🔥"
-          color="emerald"
+      {/* Main Dashboard Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <DashboardCard
+          href="/groceries/shopping-list"
+          title={t('shopping_list') || "Shopping List"}
+          icon="🛒"
+          description={t('dashboard_shopping_list_desc')}
+          colorClass="bg-emerald-500"
         />
-        <StatCard
-          label="Completed Today"
-          value="0"
-          sub="(Coming Soon)"
-          icon="✅"
-          color="blue"
+        <DashboardCard
+          href="/groceries/inventory"
+          title={t('inventory') || "Inventory"}
+          icon="🏠"
+          description={t('dashboard_inventory_desc')}
+          colorClass="bg-blue-500"
         />
-        <StatCard
-          label="Current Streak"
-          value="0"
-          sub="Days"
-          icon="⚡"
-          color="purple"
+        <DashboardCard
+          href="/groceries/recipes"
+          title={t('recipes') || "Recipes"}
+          icon="🍳"
+          description={t('dashboard_recipes_desc')}
+          colorClass="bg-orange-500"
+        />
+        <DashboardCard
+          href="/groceries/planner"
+          title={t('meal_planner') || "Meal Planner"}
+          icon="📅"
+          description={t('dashboard_planner_desc')}
+          colorClass="bg-purple-500"
         />
       </div>
-
-      {/* Recent Activity / Challenges */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Your Challenges</h2>
-          <Link href="/challenges" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
-            View All →
-          </Link>
-        </div>
-
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2].map(i => <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse" />)}
-          </div>
-        ) : challenges.length === 0 ? (
-          <div className="glass rounded-2xl p-8 text-center border-dashed border-2 border-white/10">
-            <p className="text-gray-400 mb-4">You don't have any challenges yet.</p>
-            <Link href="/challenges/new" className="text-emerald-400 hover:underline">
-              Create your first challenge
-            </Link>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {recentChallenges.map(challenge => (
-              <Link key={challenge.id} href={`/challenges/${challenge.id}`}>
-                <div className="glass glass-hover rounded-2xl p-5 h-full flex flex-col justify-between group cursor-pointer">
-                  <div>
-                    <h3 className="font-bold text-lg mb-1 group-hover:text-emerald-400 transition-colors">
-                      {challenge.name}
-                    </h3>
-                    <p className="text-sm text-gray-400 line-clamp-2">{challenge.description}</p>
-                  </div>
-                  <div className="mt-4 flex items-center justify-between text-xs text-gray-500">
-                    <span className="bg-white/5 px-2 py-1 rounded-lg">
-                      {new Date(challenge.start_date).toLocaleDateString()}
-                    </span>
-                    <span>→</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
 }
 
-function StatCard({ label, value, icon, sub, color }) {
-  const colorStyles = {
-    emerald: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/20 text-emerald-400",
-    blue: "from-blue-500/20 to-blue-500/5 border-blue-500/20 text-blue-400",
-    purple: "from-purple-500/20 to-purple-500/5 border-purple-500/20 text-purple-400",
-  }[color] || "from-gray-500/20 to-gray-500/5 border-gray-500/20 text-gray-400";
-
+function DashboardCard({ href, title, icon, description, colorClass }) {
   return (
-    <div className={`glass rounded-2xl p-6 border bg-gradient-to-br ${colorStyles} relative overflow-hidden`}>
-      <div className="relative z-10">
-        <p className="text-sm font-medium text-gray-400 mb-1">{label}</p>
-        <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-white">{value}</span>
-          {sub && <span className="text-xs text-gray-500">{sub}</span>}
+    <Link href={href} className="flex-1 min-w-[300px]">
+      <div className={`
+        group relative overflow-hidden rounded-3xl p-6 h-48 flex flex-col justify-between
+        glass glass-hover transition-all duration-300 border border-white/10
+        hover:scale-[1.02]
+      `}>
+        <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-40 ${colorClass}`} />
+
+        <div className="relative z-10">
+          <div className="text-4xl mb-4">{icon}</div>
+          <h2 className="text-2xl font-bold text-white mb-1">{title}</h2>
+          <p className="text-sm text-gray-400">{description}</p>
+        </div>
+
+        <div className="relative z-10 flex items-center text-sm font-medium opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          Open <span className="ml-1">→</span>
         </div>
       </div>
-      <div className="absolute top-4 right-4 text-2xl opacity-50 grayscale contrast-200">
-        {icon}
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -168,3 +118,4 @@ function LandingPage() {
     </div>
   );
 }
+
