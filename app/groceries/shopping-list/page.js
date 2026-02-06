@@ -12,6 +12,7 @@ import { useLanguage } from "@/lib/context/LanguageContext";
 import { ArrowDownToLine, Trash2, Settings } from "lucide-react";
 import ShoppingListItem from "@/components/groceries/ShoppingListItem";
 import AddPriceModal from "@/components/groceries/AddPriceModal";
+import MagicAddInput from "@/components/groceries/MagicAddInput";
 
 export default function ShoppingListPage() {
     const { t } = useLanguage();
@@ -52,9 +53,9 @@ export default function ShoppingListPage() {
 
     const buyGroups = groupItems(itemsToBuy);
 
-    const handleToggle = async (id, currentStatus) => {
+    const handleToggle = async (id, newStatus) => {
         try {
-            await toggleItem({ id, isChecked: !currentStatus });
+            await toggleItem({ id, isChecked: newStatus });
         } catch (err) {
             console.error(err);
         }
@@ -165,29 +166,22 @@ export default function ShoppingListPage() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="fixed bottom-[84px] left-0 right-0 p-4 max-w-4xl mx-auto pointer-events-none">
-                <div className="flex justify-between items-end pointer-events-auto gap-4">
-                    {/* Bulk Add Button (Only if checked items exist) */}
-                    <div className="flex-1">
-                        {checkedItems.length > 0 && (
-                            <button
-                                onClick={handleBulkMove}
-                                disabled={movingItems}
-                                className="w-full bg-emerald-600/90 backdrop-blur hover:bg-emerald-500 text-white font-bold py-3 px-6 rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all animate-bounce-in"
-                            >
-                                <ArrowDownToLine size={20} />
-                                {movingItems ? 'Moving...' : t('add_checked_to_inventory')}
-                            </button>
-                        )}
-                    </div>
+            <div className="fixed bottom-[84px] left-0 right-0 p-4 max-w-4xl mx-auto pointer-events-none z-40">
+                <div className="flex gap-2 items-end pointer-events-auto">
+                    {/* Magic Input */}
+                    <MagicAddInput onAdd={addItem} categories={categories} />
 
-                    {/* FAB */}
-                    <button
-                        onClick={() => setShowAddModal(true)}
-                        className="w-14 h-14 bg-emerald-500 text-white rounded-full shadow-xl shadow-emerald-500/40 flex items-center justify-center text-3xl hover:scale-110 active:scale-95 transition-all flex-shrink-0"
-                    >
-                        +
-                    </button>
+                    {/* Bulk Add Button (Small) */}
+                    {checkedItems.length > 0 && (
+                        <button
+                            onClick={handleBulkMove}
+                            disabled={movingItems}
+                            className="h-[58px] w-[58px] bg-emerald-600/90 backdrop-blur hover:bg-emerald-500 text-white rounded-2xl shadow-xl flex items-center justify-center transition-all animate-bounce-in shrink-0"
+                            title={t('add_checked_to_inventory')}
+                        >
+                            {movingItems ? <div className="animate-spin">⌛</div> : <ArrowDownToLine size={24} />}
+                        </button>
+                    )}
                 </div>
             </div>
 

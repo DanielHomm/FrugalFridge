@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Tag, Trash2, ArrowDownToLine } from "lucide-react";
 import { usePrices } from "@/lib/hooks/groceries/usePrices";
+import { useSwipeable } from "react-swipeable";
 
 export default function ShoppingListItem({ item, onToggle, onMoveToInventory, onDelete, onAddPrice }) {
     const { prices } = usePrices(item.product?.common_item_id); // Auto-fetches if common_item_id exists
@@ -10,11 +11,19 @@ export default function ShoppingListItem({ item, onToggle, onMoveToInventory, on
     // Calculate best price
     const bestPrice = prices?.length > 0 ? prices[0] : null;
 
+    const handlers = useSwipeable({
+        onSwipedLeft: () => onDelete(item.id),
+        onSwipedRight: () => onToggle(item.id, !item.is_checked),
+        preventScrollOnSwipe: true,
+        trackMouse: true
+    });
+
     return (
         <div
-            className={`group flex items-center justify-between p-4 rounded-2xl transition-all ${item.is_checked ? "bg-white/5 opacity-60" : "bg-white/10 hover:bg-white/15"}`}
+            {...handlers}
+            className={`group flex items-center justify-between p-4 rounded-2xl transition-all touch-pan-y ${item.is_checked ? "bg-white/5 opacity-60" : "bg-white/10 hover:bg-white/15"}`}
         >
-            <div className="flex items-center gap-4 flex-1">
+            <div className="flex items-center gap-4 flex-1 select-none">
                 {/* Checkbox */}
                 <button
                     onClick={() => onToggle(item.id, !item.is_checked)}
