@@ -6,6 +6,8 @@ import { AuthProvider } from "../lib/AuthContext";
 import { LanguageProvider } from "../lib/context/LanguageContext";
 import Header from "../components/Header";
 
+import { Toaster } from "react-hot-toast";
+
 export default function ClientProviderLayout({ children }) {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -15,6 +17,7 @@ export default function ClientProviderLayout({ children }) {
         <AuthProvider>
           <Header />
           <main className="p-4">{children}</main>
+          <Toaster position="bottom-center" />
         </AuthProvider>
       </LanguageProvider>
     </QueryClientProvider>

@@ -91,6 +91,16 @@ export default function ShoppingListPage() {
         }
     };
 
+    const handleAdd = async (item) => {
+        try {
+            await addItem(item);
+            toast.success(`${item.name} ${t('added_to_list')}`);
+        } catch (err) {
+            toast.error("Failed to add item");
+            console.error(err);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto p-4 space-y-6 flex flex-col h-[calc(100vh-80px)]">
             <header className="flex justify-between items-center flex-shrink-0">
@@ -124,9 +134,9 @@ export default function ShoppingListPage() {
                                         <ShoppingListItem
                                             key={item.id}
                                             item={item}
-                                            onToggle={handleToggle} // Note: signature mismatch in component, fixed below or in component? Component expects (id, status). page calls handleToggle(id, status). Matches.
+                                            onToggle={handleToggle}
                                             onDelete={deleteItem}
-                                            onMoveToInventory={moveToInventory} // Component expects id.
+                                            onMoveToInventory={moveToInventory}
                                             onAddPrice={(item) => setPriceItem(item)}
                                         />
                                     ))}
@@ -169,7 +179,7 @@ export default function ShoppingListPage() {
             <div className="fixed bottom-[84px] left-0 right-0 p-4 max-w-4xl mx-auto pointer-events-none z-40">
                 <div className="flex gap-2 items-end pointer-events-auto">
                     {/* Magic Input */}
-                    <MagicAddInput onAdd={addItem} categories={categories} />
+                    <MagicAddInput onAdd={handleAdd} categories={categories} />
 
                     {/* Bulk Add Button (Small) */}
                     {checkedItems.length > 0 && (
